@@ -1,254 +1,579 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Password Reset — Qlaraty</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap');
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --green:      #1F584E;
-      --green-light:#e2eeea;
-      --green-mid:  #3d5e58;
-      --bg:         #f0f4f3;
-      --white:      #ffffff;
-      --text:       #0e1f1c;
-      --muted:      #5a7971;
+      --forest:    #1F584E;
+      --forest-d:  #163d36;
+      --forest-l:  #2a7a6d;
+      --mint:      #d4f0e8;
+      --cream:     #fafaf7;
+      --white:     #ffffff;
+      --text:      #111c1a;
+      --text-dim:  #5a6d67;
+      --error:     #c93a3a;
     }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
+      font-family: 'Crimson Pro', serif;
+      background: var(--cream);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 24px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .card {
-      background: var(--white);
-      border-radius: 20px;
-      padding: 52px 44px;
-      max-width: 460px;
+    .blob {
+      position: fixed;
+      border-radius: 47% 53% 58% 42% / 43% 47% 53% 57%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 {
+      width: 480px; height: 480px;
+      background: radial-gradient(circle at 30% 40%, #d4f0e844 0%, #d4f0e811 50%, transparent 80%);
+      top: -180px; right: -120px;
+      animation: blobFloat 20s ease-in-out infinite;
+    }
+    .blob-2 {
+      width: 380px; height: 380px;
+      background: radial-gradient(circle at 60% 50%, #1f584e0a 0%, transparent 70%);
+      bottom: -140px; left: -100px;
+      animation: blobFloat 18s ease-in-out infinite reverse;
+    }
+    @keyframes blobFloat {
+      0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      33%       { transform: translate(30px, -40px) rotate(5deg) scale(1.05); }
+      66%       { transform: translate(-20px, 30px) rotate(-3deg) scale(0.98); }
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(31,88,78,0.015) 2px, rgba(31,88,78,0.015) 4px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
       width: 100%;
-      box-shadow: 0 4px 40px rgba(31,88,78,0.10);
-      text-align: center;
+      max-width: 540px;
+      background: var(--white);
+      border: 1px solid #e8e3da;
+      border-radius: 24px;
+      padding: clamp(48px, 7vw, 72px) clamp(32px, 5vw, 56px);
+      box-shadow:
+        0 1px 2px rgba(0,0,0,0.03),
+        0 8px 24px rgba(31,88,78,0.06),
+        0 24px 80px rgba(31,88,78,0.04);
+      animation: containerSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes containerSlide {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .logo {
-      font-family: 'DM Serif Display', serif;
-      font-size: 28px;
-      color: var(--green);
-      margin-bottom: 36px;
-      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: clamp(32px, 5vw, 48px);
+      animation: logoFade 0.7s ease 0.2s both;
+    }
+    @keyframes logoFade {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
     }
 
-    /* Spinner */
-    .spinner {
-      width: 48px; height: 48px;
-      border: 3px solid var(--green-light);
-      border-top-color: var(--green);
+    .status-icon {
+      width: clamp(80px, 12vw, 104px);
+      height: clamp(80px, 12vw, 104px);
+      margin: 0 auto clamp(28px, 4vw, 40px);
+      position: relative;
+      animation: iconPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.35s both;
+    }
+    @keyframes iconPop {
+      from { opacity: 0; transform: scale(0.4) rotate(-12deg); }
+      to   { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    .status-icon-inner {
+      width: 100%; height: 100%;
       border-radius: 50%;
-      margin: 0 auto 24px;
-      animation: spin 0.8s linear infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .spinner {
+      width: 100%; height: 100%;
+      border: 3px solid #d4f0e833;
+      border-top-color: var(--forest);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Icon circles */
-    .icon-circle {
-      width: 64px; height: 64px;
+    .pulse-ring {
+      position: absolute;
+      inset: -16px;
+      border: 2px solid var(--forest);
       border-radius: 50%;
-      margin: 0 auto 24px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 28px;
+      opacity: 0;
+      animation: pulseOut 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
     }
-    .icon-circle.success { background: var(--green-light); }
-    .icon-circle.error   { background: #fdecea; }
+    .pulse-ring:nth-child(2) { animation-delay: 0.4s; }
+    .pulse-ring:nth-child(3) { animation-delay: 0.8s; }
+    @keyframes pulseOut {
+      0%   { transform: scale(0.8); opacity: 0; }
+      20%  { opacity: 0.4; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
 
-    h2 {
-      font-family: 'DM Serif Display', serif;
-      font-size: 22px;
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--mint);
+      border: 1px solid #1f584e1a;
+      border-radius: 24px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--forest);
+      margin-bottom: 20px;
+      animation: badgeSlide 0.5s ease 0.45s both;
+    }
+    @keyframes badgeSlide {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .status-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--forest);
+      border-radius: 50%;
+      display: block;
+      animation: blink 2s ease infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    .status-badge.error {
+      background: #fdd;
+      border-color: #fbb;
+      color: var(--error);
+    }
+    .status-badge.error::before {
+      background: var(--error);
+      animation: none;
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 700;
+      line-height: 1.15;
       color: var(--text);
-      margin-bottom: 12px;
+      text-align: center;
+      margin-bottom: 16px;
+      animation: textSlide 0.5s ease 0.5s both;
+    }
+    @keyframes textSlide {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     p {
-      font-size: 15px;
-      color: var(--muted);
+      font-size: clamp(15px, 2vw, 17px);
       line-height: 1.7;
-      margin-bottom: 28px;
+      color: var(--text-dim);
+      text-align: center;
+      margin-bottom: clamp(24px, 4vw, 36px);
+      animation: textSlide 0.5s ease 0.55s both;
     }
 
-    .btn {
-      display: inline-block;
-      background: var(--green);
-      color: #fff;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 600;
-      font-size: 15px;
-      padding: 14px 32px;
-      border-radius: 12px;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      width: 100%;
-      margin-bottom: 12px;
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: clamp(32px, 5vw, 44px) 0 clamp(24px, 4vw, 32px);
+      animation: textSlide 0.5s ease 0.6s both;
     }
-    .btn:hover { background: #174a41; }
-    .btn.outline {
-      background: transparent;
-      border: 2px solid var(--green);
-      color: var(--green);
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #e8e3da 20%, #e8e3da 80%, transparent);
+    }
+    .divider span {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #aaa;
+      white-space: nowrap;
     }
 
-    .store-row {
-      display: flex; gap: 12px; justify-content: center; margin-top: 8px;
+    .stores {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      animation: textSlide 0.5s ease 0.65s both;
     }
     .store-btn {
-      flex: 1;
-      background: var(--text);
-      color: #fff;
-      border-radius: 10px;
-      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--white);
+      border: 1.5px solid #e8e3da;
+      border-radius: 12px;
       text-decoration: none;
-      font-size: 12px;
-      line-height: 1.4;
-      text-align: left;
+      color: var(--text);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
-    .store-btn span { display: block; font-size: 10px; opacity: 0.7; font-weight: 400; }
-    .store-btn strong { font-size: 14px; font-weight: 600; }
+    .store-btn:hover {
+      border-color: var(--mint);
+      background: var(--mint);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(31,88,78,0.12);
+    }
+    .store-btn svg { width: 22px; height: 22px; flex-shrink: 0; }
+    .store-text { display: flex; flex-direction: column; line-height: 1; }
+    .store-text small { font-size: 9px; color: #999; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .store-text strong { font-size: 13px; font-weight: 600; }
 
-    /* State visibility */
+    .retry-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      background: var(--forest);
+      border: none;
+      border-radius: 12px;
+      color: var(--white);
+      font-family: 'Crimson Pro', serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(31,88,78,0.2);
+    }
+    .retry-btn:hover {
+      background: var(--forest-d);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(31,88,78,0.3);
+    }
+    .retry-btn svg { width: 16px; height: 16px; }
+
+    .info-box {
+      margin-top: clamp(24px, 4vw, 32px);
+      padding: 16px 20px;
+      background: #f8f6f2;
+      border: 1px solid #e8e3da;
+      border-radius: 12px;
+      display: flex;
+      gap: 14px;
+      animation: textSlide 0.5s ease 0.7s both;
+    }
+    .info-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--forest); }
+    .info-box p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-dim);
+      text-align: left;
+      margin: 0;
+      animation: none;
+    }
+
     .state { display: none; }
     .state.active { display: block; }
 
-    @media (max-width: 480px) {
-      .card { padding: 40px 24px; }
+    footer {
+      margin-top: clamp(32px, 5vw, 48px);
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: #999;
+      letter-spacing: 0.5px;
+      animation: textSlide 0.5s ease 0.75s both;
+    }
+
+    @media (max-width: 600px) {
+      .stores { grid-template-columns: 1fr; }
+      .container { padding: 40px 28px; }
+      .store-btn { padding: 16px; }
     }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <div class="logo">Qlaraty</div>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="container">
+
+  <!-- Logo -->
+  <div class="logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 78"
+         style="width:clamp(160px,30vw,220px);height:auto;">
+      <circle cx="39" cy="39" r="34" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.22"/>
+      <circle cx="39" cy="39" r="28" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.36"/>
+      <circle cx="39" cy="39" r="22" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.52"/>
+      <circle cx="39" cy="39" r="16" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.68"/>
+      <circle cx="39" cy="39" r="10" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.84"/>
+      <circle cx="39" cy="39" r="5"  fill="none" stroke="#1F584E" stroke-width="1.8" opacity="1.0"/>
+      <circle cx="39" cy="39" r="2.2" fill="#1F584E"/>
+      <line x1="62" y1="62" x2="74" y2="74" stroke="#1F584E" stroke-width="2.6" stroke-linecap="round"/>
+      <text x="84" y="56"
+        font-family="'Outfit','Helvetica Neue',Arial,sans-serif"
+        font-size="42" font-weight="300" letter-spacing="-0.5"
+        fill="#1F584E">laraty</text>
+    </svg>
+  </div>
 
   <!-- STATE 1: Verifying -->
-  <div class="state active" id="state-verifying">
-    <div class="spinner"></div>
-    <h2>Verifying your link…</h2>
-    <p>Please wait while we check your password reset request.</p>
+  <div class="state active" id="loading-state">
+    <div class="status-icon">
+      <div class="status-icon-inner">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <div class="status-badge">Verifying</div>
+    <h1>Checking your link...</h1>
+    <p>Please wait while we verify your password reset request.</p>
   </div>
 
   <!-- STATE 2: Opening App -->
-  <div class="state" id="state-redirecting">
-    <div class="icon-circle success">🔓</div>
-    <h2>Opening Qlaraty…</h2>
-    <p>Redirecting you to the app to complete your password reset.</p>
-    <button class="btn" onclick="openDeepLink()">Open App Manually</button>
-  </div>
-
-  <!-- STATE 3: App not installed -->
-  <div class="state" id="state-no-app">
-    <div class="icon-circle success">📱</div>
-    <h2>Download Qlaraty</h2>
-    <p>You need the Qlaraty app to reset your password. Download it, then tap the reset link in your email again.</p>
-    <div class="store-row">
-      <a href="#" class="store-btn">
-        <span>GET IT ON</span>
-        <strong>Google Play</strong>
-      </a>
-      <a href="#" class="store-btn">
-        <span>DOWNLOAD ON THE</span>
-        <strong>App Store</strong>
-      </a>
+  <div class="state" id="opening-state">
+    <div class="status-icon">
+      <div class="status-icon-inner" style="background:linear-gradient(135deg,#d4f0e8,#edfaf5);box-shadow:0 4px 20px rgba(31,88,78,0.15);">
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring"></div>
+        <svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:48%;height:48%;">
+          <circle cx="35" cy="35" r="28" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.18"/>
+          <circle cx="35" cy="35" r="22" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.32"/>
+          <circle cx="35" cy="35" r="16" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.50"/>
+          <circle cx="35" cy="35" r="11" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.68"/>
+          <circle cx="35" cy="35" r="6.5" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.85"/>
+          <circle cx="35" cy="35" r="2.5" fill="#1F584E"/>
+          <line x1="49" y1="49" x2="57" y2="57" stroke="#1F584E" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="status-badge">Redirecting</div>
+    <h1>Opening Qlaraty...</h1>
+    <p>You're being redirected to the app to complete your password reset.</p>
+    <div class="info-box">
+      <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 16v-4M12 8h.01"/>
+      </svg>
+      <p>If the app doesn't open automatically in a few seconds, you can download it using the buttons below.</p>
     </div>
   </div>
 
-  <!-- STATE 4: Expired / Invalid -->
-  <div class="state" id="state-error">
-    <div class="icon-circle error">⚠️</div>
-    <h2>Link expired or invalid</h2>
-    <p>This reset link is no longer valid. Links expire after 1 hour for your security. Please request a new one from the Qlaraty app.</p>
+  <!-- STATE 3: Error / Expired -->
+  <div class="state" id="error-state">
+    <div class="status-icon">
+      <div class="status-icon-inner" style="background:linear-gradient(135deg,#ffe8e8,#fff0f0);box-shadow:0 4px 20px rgba(201,58,58,0.15);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c93a3a" stroke-width="2.5" stroke-linecap="round" style="width:40%;height:40%;">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
+    </div>
+    <div class="status-badge error">Invalid Link</div>
+    <h1>Link expired or invalid</h1>
+    <p>This password reset link is no longer valid. Links expire after 1 hour for your security. Please request a new one from the Qlaraty app.</p>
+  </div>
+
+  <!-- STATE 4: App Not Installed -->
+  <div class="state" id="fallback-state">
+    <div class="status-icon">
+      <div class="status-icon-inner" style="background:linear-gradient(135deg,#d4f0e8,#edfaf5);box-shadow:0 4px 20px rgba(31,88,78,0.15);">
+        <svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:48%;height:48%;">
+          <circle cx="35" cy="35" r="28" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.18"/>
+          <circle cx="35" cy="35" r="22" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.32"/>
+          <circle cx="35" cy="35" r="16" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.50"/>
+          <circle cx="35" cy="35" r="11" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.68"/>
+          <circle cx="35" cy="35" r="6.5" fill="none" stroke="#1F584E" stroke-width="1.8" opacity="0.85"/>
+          <circle cx="35" cy="35" r="2.5" fill="#1F584E"/>
+          <line x1="49" y1="49" x2="57" y2="57" stroke="#1F584E" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="status-badge">App Required</div>
+    <h1>Download Qlaraty</h1>
+    <p>You need the Qlaraty app to reset your password. Download it to continue.</p>
+
+    <div class="divider"><span>Get the app</span></div>
+
+    <div class="stores">
+      <a class="store-btn" id="playBtn" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <path d="M3.5 2.7a1 1 0 00-.5.87v16.86a1 1 0 00.5.87l.08.05 9.44-9.43v-.25L3.58 2.65z" fill="#1F584E" opacity="0.85"/>
+          <path d="M16.2 13.7l-3.14-3.15-9.46 9.45c.34.35.88.4 1.31.13z" fill="#1F584E" opacity="0.65"/>
+          <path d="M16.2 10.3L4.91 3.88a1 1 0 00-1.31.12l9.46 9.45z" fill="#1F584E" opacity="0.65"/>
+          <path d="M16.2 10.3l-3.14 3.15 3.14 3.15 2.9-1.65a1 1 0 000-3z" fill="#1F584E"/>
+        </svg>
+        <div class="store-text">
+          <small>GET IT ON</small>
+          <strong>Google Play</strong>
+        </div>
+      </a>
+      <a class="store-btn" id="appleBtn" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="#1F584E" width="22" height="22">
+          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04l-.07.28zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        </svg>
+        <div class="store-text">
+          <small>DOWNLOAD ON</small>
+          <strong>App Store</strong>
+        </div>
+      </a>
+    </div>
+
+    <div style="text-align:center;">
+      <button class="retry-btn" onclick="retryOpenApp()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+        </svg>
+        Try Opening App Again
+      </button>
+    </div>
+
+    <div class="info-box">
+      <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 16v-4M12 8h.01"/>
+      </svg>
+      <p>After installing, return to your email and tap the reset link again to open the app.</p>
+    </div>
   </div>
 
 </div>
 
+<footer>© 2026 Qlaraty — Secure Account Recovery</footer>
+
 <script>
-  // ─── CONFIGURATION ────────────────────────────────────────────────
-  // Change this to your actual deep link scheme registered in FlutterFlow
-  const DEEP_LINK_SCHEME = 'qlaraty'; // e.g. qlaraty://
-  const DEEP_LINK_PATH   = 'reset-password'; // the page path in your app
-  // ──────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════
+  // CONFIGURATION — only edit these 3 lines
+  // ═══════════════════════════════════════════════════════════════
+  const DEEP_LINK      = 'qlaraty://qlaraty.com/resetPassword';
+  const PLAY_STORE_URL = 'https://play.google.com/store';
+  const APP_STORE_URL  = 'https://www.apple.com/app-store/';
+  // ═══════════════════════════════════════════════════════════════
+
+  // Wire store buttons from config
+  document.getElementById('playBtn').href  = PLAY_STORE_URL;
+  document.getElementById('appleBtn').href = APP_STORE_URL;
 
   let accessToken  = null;
   let refreshToken = null;
-  let deepLinkUrl  = null;
+
+  // Read tokens — checks URL hash (#) first, then query string (?) as fallback
+  // Supabase normally uses hash, but some versions use query params
+  function getParams() {
+    const hash = window.location.hash.substring(1);
+    const hashParams = {};
+    hash.split('&').forEach(pair => {
+      const [k, v] = pair.split('=');
+      if (k) hashParams[decodeURIComponent(k)] = decodeURIComponent(v || '');
+    });
+    if (hashParams.access_token) return hashParams;
+
+    // Fallback: query string
+    return Object.fromEntries(new URLSearchParams(window.location.search));
+  }
 
   function showState(id) {
     document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
 
-  function openDeepLink() {
-    if (deepLinkUrl) window.location.href = deepLinkUrl;
-  }
+  function openApp() {
+    const separator = DEEP_LINK.includes('?') ? '&' : '?';
+    const deepLink  = `${DEEP_LINK}${separator}access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(refreshToken || '')}&type=recovery`;
 
-  function buildAndLaunchDeepLink() {
-    // Build the deep link carrying both tokens into the app
-    deepLinkUrl = `${DEEP_LINK_SCHEME}://${DEEP_LINK_PATH}?access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(refreshToken)}&type=recovery`;
+    console.log('Firing deep link:', deepLink);
+    window.location.href = deepLink;
 
-    showState('state-redirecting');
+    // If the app opens, the browser tab goes to background (hidden)
+    // We track this to avoid wrongly showing the "download" screen
+    let appOpened = false;
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) appOpened = true;
+    });
 
-    // Try to open the app
-    window.location.href = deepLinkUrl;
-
-    // If app not installed, show download state after 2.5s
+    // After 3.5s: if page is still visible → app not installed → show download screen
     setTimeout(() => {
-      if (!document.hidden) {
-        showState('state-no-app');
+      if (!appOpened) {
+        console.warn('App did not open — showing download screen');
+        showState('fallback-state');
       }
-    }, 2500);
+    }, 3500);
   }
 
-  function init() {
-    // Supabase sends tokens in the URL HASH (#), not query params (?)
-    // e.g. https://yourpage.github.io/.../#access_token=XX&refresh_token=YY&type=recovery
-    const hash = window.location.hash.substring(1); // strip the leading #
-    const params = new URLSearchParams(hash);
-
-    accessToken  = params.get('access_token');
-    refreshToken = params.get('refresh_token');
-    const type   = params.get('type');
-    const error  = params.get('error');
-
-    // Also check query string (some Supabase versions use this)
-    if (!accessToken) {
-      const qParams = new URLSearchParams(window.location.search);
-      accessToken  = qParams.get('access_token');
-      refreshToken = qParams.get('refresh_token');
-    }
-
-    if (error || !accessToken || !refreshToken) {
-      // No valid tokens found → expired or bad link
-      showState('state-error');
-      return;
-    }
-
-    if (type !== 'recovery') {
-      showState('state-error');
-      return;
-    }
-
-    // Valid tokens found → launch the app
-    buildAndLaunchDeepLink();
+  function retryOpenApp() {
+    showState('opening-state');
+    setTimeout(openApp, 500);
   }
 
-  // Run on load
-  window.addEventListener('load', init);
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = getParams();
+
+    // Brief delay to show the verifying animation
+    setTimeout(() => {
+
+      // Supabase returned an auth error (e.g. expired token)
+      if (params.error) {
+        console.error('Auth error:', params.error, params.error_description);
+        showState('error-state');
+        return;
+      }
+
+      // Missing token or wrong link type
+      if (params.type !== 'recovery' || !params.access_token) {
+        console.warn('Invalid or missing recovery token');
+        showState('error-state');
+        return;
+      }
+
+      // ✅ Valid — store tokens and launch the app
+      accessToken  = params.access_token;
+      refreshToken = params.refresh_token || null;
+
+      console.log('Valid recovery token found — launching app');
+      showState('opening-state');
+      setTimeout(openApp, 1000); // small delay so user sees the "Opening" screen
+
+    }, 1200);
+  });
 </script>
 
 </body>
