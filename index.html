@@ -517,8 +517,8 @@
   }
 
   function openApp() {
-    const separator = DEEP_LINK.includes('?') ? '&' : '?';
-    const deepLink  = `${DEEP_LINK}${separator}access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(refreshToken || '')}&type=recovery`;
+    // Tokens embedded in PATH — matches FlutterFlow route: /resetPassword/:accessToken/:refreshToken
+    const deepLink = `qlaraty://qlaraty.com/resetPassword/${accessToken}/${refreshToken || ''}`;
 
     console.log('Firing deep link:', deepLink);
     window.location.href = deepLink;
