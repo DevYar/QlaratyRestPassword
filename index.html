@@ -517,8 +517,11 @@
   }
 
   function openApp() {
-    // Tokens embedded in PATH — matches FlutterFlow route: /resetPassword/:accessToken/:refreshToken
-    const deepLink = `qlaraty://qlaraty.com/resetPassword/${accessToken}/${refreshToken || ''}`;
+    // Base64 encode tokens to remove slashes and special chars that break URL path matching
+    const safeAccess  = btoa(accessToken).replace(/\//g, '_').replace(/\+/g, '-').replace(/=/g, '');
+    const safeRefresh = btoa(refreshToken || '').replace(/\//g, '_').replace(/\+/g, '-').replace(/=/g, '');
+
+    const deepLink = `qlaraty://qlaraty.com/resetPassword/${safeAccess}/${safeRefresh}`;
 
     console.log('Firing deep link:', deepLink);
     window.location.href = deepLink;
